@@ -10,7 +10,7 @@ public class Player : MonoBehaviour
 
     private int _maxJumpCount;
     private int _jumpCount;
-    private bool isCollidedWithWall;
+    private bool _isCollidedWithWall;
     private float _hp;
 
     private void Start()
@@ -21,7 +21,7 @@ public class Player : MonoBehaviour
 
         _maxJumpCount = 2;
         _jumpCount = 0;
-        isCollidedWithWall = false;
+        _isCollidedWithWall = false;
         _hp = 100.0f;
     }
 
@@ -35,28 +35,27 @@ public class Player : MonoBehaviour
     private void OnCollisionEnter2D(Collision2D other)
     {
         // 바닥에 착지하면 달리기로 변경, 점프 횟수 초기화
-        if (other.gameObject.tag == "Ground")
+        if (other.gameObject.CompareTag("Ground"))
         {
             _animator.SetTrigger("run");
             _jumpCount = 0;
         }
 
         // 벽과 충돌중임을 저장함
-        if (other.gameObject.tag == "Wall")
+        else if (other.gameObject.CompareTag("Wall"))
         {
             _animator.SetTrigger("run");
             _jumpCount = 0;
-            isCollidedWithWall = true;
+            _isCollidedWithWall = true;
         }
     }
 
     private void OnCollisionExit2D(Collision2D other)
     {
-        if (other.gameObject.tag == "Wall")
-        {
-            isCollidedWithWall = false;
-        }
+        if (other.gameObject.CompareTag("Wall"))
+            _isCollidedWithWall = false;
     }
+    
     private void OnTriggerEnter2D(Collider2D other)
     {
         _hp -= 10.0f;
@@ -147,7 +146,7 @@ public class Player : MonoBehaviour
     private void UpdateSpeed()
     {
         // 벽에 의해 뒤로 밀렸다면, 다시 제자리로 오도록함
-        if (transform.position.x < 0.0f && !isCollidedWithWall)
+        if (transform.position.x < 0.0f && !_isCollidedWithWall)
         {
             Vector3 pos = transform.position;
             pos.x += 3.0f * Time.deltaTime;
