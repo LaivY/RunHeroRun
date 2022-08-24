@@ -19,6 +19,8 @@ public class Obstacles
 public class GameManager : MonoBehaviour
 {
     public static GameManager instance = null;
+    public Camera _camera;
+    public Player _player;
     public GameObject _obstacles;
     public GameObject _prefeb;
     public int _stage;
@@ -39,7 +41,11 @@ public class GameManager : MonoBehaviour
 
     private void Update()
     {
-        _obstacles.transform.Translate(-5.0f * Time.deltaTime, 0.0f, 0.0f);
+        Vector3 pos = _player.transform.position;
+        pos.x += 5.0f;
+        pos.y = _camera.transform.position.y;
+        pos.z = _camera.transform.position.z;
+        _camera.transform.position = pos;
     }
 
     private void LoadStageData()
