@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 [System.Serializable]
 public class Obstacle
@@ -23,7 +24,10 @@ public class GameManager : MonoBehaviour
     public Player _player;
     public GameObject _obstacles;
     public GameObject _prefeb;
+    public GameObject _scoreText;
     public int _stage;
+    public int _score;
+    private TextMeshProUGUI _scoreTextMesh;
 
     private void Awake()
     {
@@ -32,11 +36,7 @@ public class GameManager : MonoBehaviour
         else
             Destroy(this);
         LoadStageData();
-    }
-
-    private void Start()
-    {
-
+        _scoreTextMesh = _scoreText.GetComponent<TextMeshProUGUI>();
     }
 
     private void Update()
@@ -47,6 +47,8 @@ public class GameManager : MonoBehaviour
         pos.y = _camera.transform.position.y;
         pos.z = _camera.transform.position.z;
         _camera.transform.position = pos;
+
+        _scoreTextMesh.text = _score.ToString();
     }
 
     private void LoadStageData()
@@ -59,5 +61,11 @@ public class GameManager : MonoBehaviour
             tmp.transform.position = new Vector3(w.x, w.y, 0.0f);
             tmp.transform.SetParent(_obstacles.transform);
         }
+    }
+
+    public void OnPlayerGetGem(Gem gem)
+    {
+        _score += gem.score;
+        Destroy(gem.gameObject);
     }
 }

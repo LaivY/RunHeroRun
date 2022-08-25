@@ -8,6 +8,7 @@ public class Player : MonoBehaviour
     private Rigidbody2D _rigidbody;
     private BoxCollider2D _collider;
 
+    private bool _isOnGround;
     private bool _isJumped;
     private int _jumpCount;
     private int _maxJumpCount;
@@ -20,14 +21,11 @@ public class Player : MonoBehaviour
         _rigidbody = GetComponent<Rigidbody2D>();
         _collider = GetComponent<BoxCollider2D>();
 
-        _maxJumpCount = 2;
+        _isOnGround = false;
+        _isJumped = false;
         _jumpCount = 0;
+        _maxJumpCount = 2;
         _hp = _maxhp = 100.0f;
-    }
-
-    private void Start()
-    {
-        
     }
 
     private void Update()
@@ -49,17 +47,25 @@ public class Player : MonoBehaviour
     private void OnCollisionEnter2D(Collision2D other)
     {
         // 바닥에 착지하면 달리기로 변경, 점프 횟수 초기화
-        if (other.gameObject.CompareTag("Ground") || other.gameObject.CompareTag("Wall"))
+        if (other.gameObject.CompareTag("Ground"))
         {
             _animator.SetTrigger("run");
             _jumpCount = 0;
+            _isOnGround = true;
+        }
+    }
+
+    private void OnCollisionExit2D(Collision2D other)
+    {
+        if (other.gameObject.CompareTag("Ground"))
+        {
+            _isOnGround = false;
         }
     }
     
     private void OnTriggerEnter2D(Collider2D other)
     {
         _hp -= 10.0f;
-        Debug.Log("!");
     }
 
     private void ProcessInput()
@@ -76,7 +82,7 @@ public class Player : MonoBehaviour
                 _animator.SetBool("isSliding", true);
 
             // 밑으로 떨어지는 중이라면 떨어지는 애니메이션 재생
-            if (_rigidbody.velocity.y < 0.0f)
+            if (!_isOnGround && _rigidbody.velocity.y < 0.0f)
             {
                 _animator.SetTrigger("fall");
                 ++_jumpCount;
