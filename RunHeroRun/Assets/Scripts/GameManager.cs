@@ -43,6 +43,7 @@ public class GameManager : MonoBehaviour
     {
         Vector3 pos = _player.transform.position;
         pos.x += 5.0f;
+        pos.x = Mathf.Max(6.0f, pos.x);
         pos.y = _camera.transform.position.y;
         pos.z = _camera.transform.position.z;
         _camera.transform.position = pos;
