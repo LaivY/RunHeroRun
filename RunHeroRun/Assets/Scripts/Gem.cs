@@ -4,10 +4,10 @@ using UnityEngine;
 
 public class Gem : MonoBehaviour
 {
-    public int score;
+    public int _score;
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        GameManager.instance.OnPlayerGetGem(this);
+        GameManager.instance._player.OnGainGem(this);
     }
 }

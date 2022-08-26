@@ -6,14 +6,15 @@ using UnityEngine.UI;
 public class HPBar : MonoBehaviour
 {
     private Image _image;
+    private Player _player;
     private float _deltaHp;
     private float _hp;
-    public Player _player;
     public float _decreaseSpeed;
 
     private void Awake()
     {
         _image = GetComponent<Image>();
+        _player = GameManager.instance._player;
     }
 
     private void Start()

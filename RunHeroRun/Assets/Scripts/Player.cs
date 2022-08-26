@@ -10,6 +10,7 @@ public class Player : MonoBehaviour
 
     private bool _isOnGround;
     private bool _isJumped;
+    private bool _isFinished;
     private int _jumpCount;
     private int _maxJumpCount;
     private float _hp;
@@ -30,13 +31,25 @@ public class Player : MonoBehaviour
 
     private void Update()
     {
-        ProcessInput();     // 입력에 따른 상태 변환
-        UpdateCollider();   // 상태에 따른 콜라이더 위치 설정
+        ProcessInput();     // 입력 처리
+        UpdateCollider();   // 콜라이더 위치 설정
+
+        // 목표 지점에 도착했으면 idle 애니메이션 재생
+        if (_isOnGround && _isFinished && !_animator.GetCurrentAnimatorStateInfo(0).IsName("idle"))
+        {
+            _animator.SetTrigger("idle");
+        }
     }
 
     private void FixedUpdate()
     {
-        _rigidbody.velocity = new Vector2(5.0f, _rigidbody.velocity.y);
+        // 목표 지점을 넘어갈 수 없게 설정
+        if (transform.position.x < GameManager.instance._finish)
+            _rigidbody.velocity = new Vector2(5.0f, _rigidbody.velocity.y);
+        else
+            _rigidbody.velocity = new Vector2(0.0f, _rigidbody.velocity.y);
+
+        // 점프
         if (_isJumped)
         {
             _isJumped = false;
@@ -65,7 +78,10 @@ public class Player : MonoBehaviour
     
     private void OnTriggerEnter2D(Collider2D other)
     {
-        _hp -= 10.0f;
+        if (other.gameObject.CompareTag("Obstacle"))
+            _hp -= 10.0f;
+        else if (other.gameObject.CompareTag("Finish"))
+            _isFinished = true;
     }
 
     private void ProcessInput()
@@ -157,6 +173,12 @@ public class Player : MonoBehaviour
         _animator.SetTrigger("jump");
         _isJumped = true;
         ++_jumpCount;
+    }
+
+    public void OnGainGem(Gem gem)
+    {
+        GameManager.instance._score += gem._score;
+        Destroy(gem.gameObject);
     }
 
     public float GetHp()
