@@ -4,13 +4,13 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
+    private SpriteRenderer _renderer;
     private Animator _animator;
     private Rigidbody2D _rigidbody;
     private BoxCollider2D _collider;
 
     private bool _isOnGround;
     private bool _isJumped;
-    private bool _isFinished;
     private int _jumpCount;
     private int _maxJumpCount;
     private float _hp;
@@ -18,6 +18,7 @@ public class Player : MonoBehaviour
 
     private void Awake()
     {
+        _renderer = GetComponent<SpriteRenderer>();
         _animator = GetComponent<Animator>();
         _rigidbody = GetComponent<Rigidbody2D>();
         _collider = GetComponent<BoxCollider2D>();
@@ -35,7 +36,7 @@ public class Player : MonoBehaviour
         UpdateCollider();   // 콜라이더 위치 설정
 
         // 목표 지점에 도착했으면 idle 애니메이션 재생
-        if (_isOnGround && _isFinished && !_animator.GetCurrentAnimatorStateInfo(0).IsName("idle"))
+        if (_isOnGround && GameManager.instance._isFinished && !_animator.GetCurrentAnimatorStateInfo(0).IsName("idle"))
         {
             _animator.SetTrigger("idle");
         }
@@ -44,7 +45,7 @@ public class Player : MonoBehaviour
     private void FixedUpdate()
     {
         // 목표 지점을 넘어갈 수 없게 설정
-        if (transform.position.x < GameManager.instance._finish)
+        if (transform.position.x < GameManager.instance._finishLine)
             _rigidbody.velocity = new Vector2(5.0f, _rigidbody.velocity.y);
         else
             _rigidbody.velocity = new Vector2(0.0f, _rigidbody.velocity.y);
@@ -79,9 +80,9 @@ public class Player : MonoBehaviour
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (other.gameObject.CompareTag("Obstacle"))
-            _hp -= 10.0f;
+            OnDamaged();
         else if (other.gameObject.CompareTag("Finish"))
-            _isFinished = true;
+            GameManager.instance._isFinished = true;
     }
 
     private void ProcessInput()
@@ -90,11 +91,11 @@ public class Player : MonoBehaviour
         if (_animator.GetCurrentAnimatorStateInfo(0).IsName("run"))
         {
             // 점프
-            if (Input.GetKeyDown(KeyCode.Space))
+            if (Input.GetKeyDown(KeyCode.F))
                 Jump();
 
             // 슬라이딩
-            if (Input.GetKey(KeyCode.LeftShift))
+            if (Input.GetKey(KeyCode.J))
                 _animator.SetBool("isSliding", true);
 
             // 밑으로 떨어지는 중이라면 떨어지는 애니메이션 재생
@@ -109,14 +110,14 @@ public class Player : MonoBehaviour
         if (_animator.GetCurrentAnimatorStateInfo(0).IsName("slide"))
         {
             // 점프
-            if (Input.GetKeyDown(KeyCode.Space))
+            if (Input.GetKeyDown(KeyCode.F))
             {
                 _animator.SetBool("isSliding", false);
                 Jump();
             }
 
             // 달리기
-            if (!Input.GetKey(KeyCode.LeftShift))
+            if (!Input.GetKey(KeyCode.J))
             {
                 _animator.SetBool("isSliding", false);
                 _animator.SetTrigger("run");
@@ -127,7 +128,7 @@ public class Player : MonoBehaviour
         if (_animator.GetCurrentAnimatorStateInfo(0).IsName("jump"))
         {
             // 추가 점프
-            if (Input.GetKeyDown(KeyCode.Space) && _jumpCount < _maxJumpCount)
+            if (Input.GetKeyDown(KeyCode.F) && _jumpCount < _maxJumpCount)
                 Jump();
 
             // 점프 애니메이션이 끝나면 떨어지는 애니메이션 재생
@@ -139,7 +140,7 @@ public class Player : MonoBehaviour
         if (_animator.GetCurrentAnimatorStateInfo(0).IsName("fall"))
         {
             // 추가 점프
-            if (Input.GetKeyDown(KeyCode.Space) && _jumpCount < _maxJumpCount)
+            if (Input.GetKeyDown(KeyCode.F) && _jumpCount < _maxJumpCount)
                 Jump();
         }
     }
@@ -179,6 +180,20 @@ public class Player : MonoBehaviour
     {
         GameManager.instance._score += gem._score;
         Destroy(gem.gameObject);
+    }
+
+    public void OnDamaged()
+    {
+        _hp -= 10.0f;
+        gameObject.layer = LayerMask.NameToLayer("Invincible");
+        _renderer.color = new Color(1.0f, 1.0f, 1.0f, 0.5f);
+        Invoke("OnDamagedExit", 1.5f);
+    }
+
+    public void OnDamagedExit()
+    {
+        gameObject.layer = LayerMask.NameToLayer("Player");
+        _renderer.color = new Color(1.0f, 1.0f, 1.0f, 1.0f);
     }
 
     public float GetHp()

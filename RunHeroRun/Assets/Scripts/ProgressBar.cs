@@ -11,7 +11,7 @@ public class ProgressBar : MonoBehaviour
     private void Start()
     {
         _player = GameManager.instance._player;
-        _finish = GameManager.instance._finish;
+        _finish = GameManager.instance._finishLine;
     }
 
     private void Update()

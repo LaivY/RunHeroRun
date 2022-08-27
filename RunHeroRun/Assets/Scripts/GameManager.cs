@@ -26,7 +26,8 @@ public class GameManager : MonoBehaviour
     public GameObject _scoreText;
     public GameObject _progressBar;
     public int _score;
-    public float _finish;
+    public float _finishLine;
+    public bool _isFinished;
 
     private void Awake()
     {
@@ -38,6 +39,6 @@ public class GameManager : MonoBehaviour
 
         // 목표 위치
         Transform transform = _stage.gameObject.transform.Find("Finish");
-        _finish = transform.position.x;
+        _finishLine = transform.position.x;
     }
 }
